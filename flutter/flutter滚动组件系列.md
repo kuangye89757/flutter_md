@@ -712,3 +712,103 @@ SliverFillViewport(
    viewportFraction: 0.5, // 占据半个视窗
 ),
 ```
+
+#### 六、[SliverAppBar](https://blog.csdn.net/yechaoa/article/details/90701321)
+
+> 类似**Android Material  Design**的`AppBarLayout`功能
+
+- `floating` :  
+  - false, 只有滚动到顶部显示，同Android layout_scrollFlags的 exitUntilCollapsed
+  - true,  只要一下拉就出现 ，同Android layout_scrollFlags的 enterAlways
+- `pinned` : 
+  - true，**一直显示SliverAppBar**，且仅当下方处于非顶部时，会有阴影效果
+- `snap` : 
+  - true，有向上滚动趋势时，则隐藏SliverAppBar； 有向下滚动趋势时，则显示
+- `expandedHeight`: 最大扩展高度
+
+- `flexibleSpace` :  SliverAppBar背景空间
+  - 使用FlexibleSpaceBar，配合**expandedHeight**一起使用
+- `stretch` : 开启拉伸效果，同**stretchModes**配合使用
+- `bottom`:  底部添加Tabbar
+
+##### FlexibleSpaceBar
+
+- `background` : 背景内容
+- `title` :  跟随移动进行缩放的效果
+- `centerTitle` : 文字显示在中间，IOS默认为true
+- `stretchModes`： 拉伸模式，超过**expandedHeight**视为拉伸，可效果叠加
+- `collapseMode` ： 收缩模式，对应Android layout_collapseMode的三种模式；默认为**视差效果parallax**
+
+<img src="/Users/shijiewang/Downloads/1634205307746038.gif" alt="1634205307746038" style="zoom:50%;" />
+
+
+
+```dart
+CustomScrollView(
+  physics: BouncingScrollPhysics(),
+  slivers: [
+    SliverAppBar(
+      floating: true,
+      pinned: true,
+      snap: true,
+      expandedHeight: 245,
+      stretch: true,
+      flexibleSpace: FlexibleSpaceBar(
+        title: Text('Sliver的世界'),
+        background: Image.asset('assets/images/pic.webp', fit: BoxFit.fill,),
+        collapseMode: CollapseMode.parallax,
+        centerTitle: true,
+        stretchModes: [
+          StretchMode.blurBackground, // 在拉伸过程中，background开始blur(高斯模糊)
+          StretchMode.fadeTitle,// 在拉伸过程中，title开始fade
+          StretchMode.zoomBackground // 在拉伸过程中，background开始缩放
+        ],
+      ),
+    ),
+    SliverToBoxAdapter(
+      child: FlutterLogo(size: 100,),
+    ),
+    SliverGrid(
+      delegate: SliverChildBuilderDelegate((_, index) {
+        return Container(
+          height: 200,
+          color: Colors.primaries[index % Colors.primaries.length],
+        );
+      },childCount: 23,),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        childAspectRatio: 16 / 9,
+        mainAxisSpacing: 3,
+        crossAxisSpacing: 3,
+      ),
+    ),
+    SliverPrototypeExtentList(
+      prototypeItem: Container(
+        height: 100,
+        color: Colors.primaries[1],
+      ),
+      delegate: SliverChildBuilderDelegate((_, index) {
+        return Container(
+          height: 100,
+          color: Colors.primaries[index % Colors.primaries.length],
+        );
+      }, childCount: 10),
+    ),
+    SliverFillViewport(
+      delegate: SliverChildBuilderDelegate(
+        (_, index) {
+          return Container(
+            color: Colors.primaries[index],
+            child: Text(
+              'Hello',
+              style: TextStyle(fontSize: 36, color: Colors.yellow),
+            ),
+          );
+        },
+        childCount: 6,
+      ),
+      viewportFraction: 0.5,
+    ),
+  ],
+)
+```
