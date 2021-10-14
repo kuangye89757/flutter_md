@@ -560,3 +560,155 @@ GridView.builder(
 
 非动态可以使用： GridView.extent(maxCrossAxisExtent: 4)
 ```
+
+
+
+## Slivers
+
+> sliver译为：一小片；就是关于片段itemView的一套小组件库
+
+
+
+### CustomScrollView -- 视窗
+
+> 进入Sliver的世界需要借助视窗作为桥梁，一般使用**CustomScrollView**
+
+- `slivers` :  必填项，`Slivers相关的组件列表`
+
+
+
+### Slivers组件
+
+#### 一、SliverToBoxAdapter
+
+> 将`RenderBoxWidget`【常用的widget】转化成`Sliver组件`的适配器
+
+```
+SliverToBoxAdapter(
+  child: FlutterLogo(size: 100,),
+)
+```
+
+#### 二、SliverList
+
+> **ListView、GridView内部就是使用Sliver的委托类处理的**
+
+- delegate ： 接收一个Sliver的委托类
+
+  - **SliverChild`Builder`Delegate** --  动态加载建造itemView使用；ListView.builder等方式的底层实现
+
+  - **SliverChild`List`Delegate** -- 固定个数itemView使用; 同直接使用ListView
+
+  - ```dart
+    ListView.builder({
+      ...
+    }) : 
+         childrenDelegate = SliverChildBuilderDelegate(
+           itemBuilder, // 列表widget
+           childCount: itemCount, // 列表格式
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+         ),
+    ```
+
+#### 三、SliverFixedExtentList 【确定尺寸】
+
+> 同ListView的 itemExtent，固定每项itemView主轴方向尺寸时使用
+
+```dart
+SliverFixedExtentList(
+  itemExtent: 80,
+  delegate: SliverChildBuilderDelegate((_, index) {
+    return Container(
+      color: Colors.primaries[index % Colors.primaries.length],
+    );
+  }),
+),
+```
+
+#### 四、SliverPrototypeExtentList 【不确定尺寸】
+
+> 同SliverFixedExtentList，但若无法确定item主轴方向尺寸，可以通过设置一个不可见的原型，计算完成后，会像SliverFixedExtentList一样使用该尺寸，设置itemView【推荐】
+
+```dart
+SliverPrototypeExtentList(
+  prototypeItem: Container(
+    height: 100,
+  ),
+  delegate: SliverChildBuilderDelegate((_, index) {
+    return Container(
+      color: Colors.primaries[index % Colors.primaries.length],
+    );
+  }),
+)
+
+// prototypeItem的widget不会真正显示，只是用来计算的，计算出的尺寸会像SliverFixedExtentList一样使用该尺寸，设置itemView
+```
+
+
+
+#### 四、SliverGrid
+
+> GridView内部的Sliver方式
+
+- delegate ： 同SliverList的delegate
+- gridDelegate ： 同GridView的gridDelegate 【实际是一个东西】 
+
+<img src="/Users/shijiewang/Library/Application Support/typora-user-images/image-20211014160622291.png" alt="image-20211014160622291" style="zoom:50%;" />
+
+```dart
+CustomScrollView(
+  physics: BouncingScrollPhysics(),
+  slivers: [
+    SliverToBoxAdapter(
+      child: FlutterLogo(size: 100,),
+    ),
+    SliverGrid(
+      delegate: SliverChildBuilderDelegate((_, index) {
+        return Container(
+          height: 200,
+          color: Colors.primaries[index % Colors.primaries.length],
+        );
+      },childCount: 23,),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        childAspectRatio: 16 / 9,
+        mainAxisSpacing: 3,
+        crossAxisSpacing: 3,
+      ),
+    ),
+    SliverList(
+      delegate: SliverChildBuilderDelegate((_, index) {
+        return Container(
+          height: 100,
+          color: Colors.primaries[index % Colors.primaries.length],
+        );
+      }),
+    ),
+  ],
+)
+```
+
+#### 五、SliverFillViewport
+
+> 每个itemView填充视窗
+
+- viewportFraction比例默认为1，占据整个视窗；
+
+<img src="/Users/shijiewang/Library/Application Support/typora-user-images/image-20211014163222467.png" alt="image-20211014163222467" style="zoom:30%;" />
+
+```dart
+SliverFillViewport(
+		delegate: SliverChildBuilderDelegate((_, index) {
+			return Container(
+        color: Colors.primaries[index],
+        child: Text(
+          'Hello',
+          style: TextStyle(fontSize: 36, color: Colors.yellow),
+        ),
+      );
+		}, childCount: 6,),
+   viewportFraction: 0.5, // 占据半个视窗
+),
+```
